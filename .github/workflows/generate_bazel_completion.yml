@@ -1,0 +1,48 @@
+name: Generate Completion Script 
+
+on:
+  workflow_dispatch:
+    inputs:
+      ubuntuVersion:
+        description: 'Ubuntu Version (20.04 or 22.04)'
+        required: true
+        default: '22.04'
+      tagVersion:
+        description: 'Tag Version'
+        required: true
+        default: 'latest'
+jobs:
+  build:
+    runs-on: ubuntu-${{ github.event.inputs.ubuntuVersion }}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.tagVersion }}
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Install Bazel
+      run: |
+        BAZELISK_EXE="bazelisk-linux-amd64"
+        curl -LO https://github.com/bazelbuild/bazelisk/releases/latest/download/$BAZELISK_EXE
+        chmod +x $BAZELISK_EXE
+        sudo mv $BAZELISK_EXE /usr/local/bin/bazel
+        echo "Install Bazel Complete!"
+        bazel --version
+
+
+    - name: Generate Bazel Completion Script
+      run: |
+        # Generating Bazel Bash Completion
+        bazel build //scripts:bazel-complete.bash
+
+    - name: Archive Bazel Completion Script
+      uses: actions/upload-artifact@v2
+      with:
+        name: bazel-complete
+        path: bazel-bin/scripts/bazel-complete.bash
