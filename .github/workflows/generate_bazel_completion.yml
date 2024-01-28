@@ -9,8 +9,8 @@ on:
         default: '22.04'
       tagVersion:
         description: 'Tag Version'
-        required: true
-        default: 'latest'
+        required: false
+        default: ''
 jobs:
   build:
     runs-on: ubuntu-${{ github.event.inputs.ubuntuVersion }}
@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0  # Necessary for a complete clone        
-        ref: ${{ github.event.inputs.tagVersion }}
+        ref: ${{ github.event.inputs.tag || 'refs/heads/main' }}
 
 
 
